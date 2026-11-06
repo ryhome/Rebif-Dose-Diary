@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rotate</title>
+<meta name="theme-color" content="#2F6F8F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Rotate">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#F6F8F7;--surface:#FFFFFF;--ink:#1F2A2E;--muted:#5E6E74;--line:#D8E0E2;
+  --accent:#2F6F8F;--accent-ink:#FFFFFF;--ok:#3C8D5A;--wait:#C98A2B;--bad:#B5473C;
+  --ok-bg:#E4F2E9;--wait-bg:#FBEFD9;--bad-bg:#F7E1DE;--accent-bg:#E1EDF3;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#121A1D;--surface:#1B262A;--ink:#E6EDEF;--muted:#9FB0B6;--line:#2E3C42;
+    --accent:#6FB0CF;--accent-ink:#0F1A1F;--ok:#6CBF8A;--wait:#E0A94E;--bad:#E07A6E;
+    --ok-bg:#1C3326;--wait-bg:#3A2D14;--bad-bg:#3C1F1B;--accent-bg:#1E3440;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121A1D;--surface:#1B262A;--ink:#E6EDEF;--muted:#9FB0B6;--line:#2E3C42;
+  --accent:#6FB0CF;--accent-ink:#0F1A1F;--ok:#6CBF8A;--wait:#E0A94E;--bad:#E07A6E;
+  --ok-bg:#1C3326;--wait-bg:#3A2D14;--bad-bg:#3C1F1B;--accent-bg:#1E3440;
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+  font-family:"IBM Plex Sans Thai","Noto Sans Thai","Segoe UI",system-ui,sans-serif;
+  font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;font-weight:600;line-height:1.25}
+h1{font-size:1.5rem}h2{font-size:1.15rem}h3{font-size:1rem}
+p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.app{max-width:560px;margin:0 auto;padding:16px 16px 92px}
+header.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:16px}
+header.top .sub{color:var(--muted);font-size:.9rem}
+.view{display:none}.view.active{display:block}
+.stack>*+*{margin-top:14px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
+.panel.tight{padding:12px 14px}
+.muted{color:var(--muted)}
+.small{font-size:.85rem}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.between{justify-content:space-between}
+.grow{flex:1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);
+  background:var(--surface);border-radius:10px;padding:10px 14px;font-weight:500;min-height:44px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.block{width:100%}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.zone:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.field{display:block}
+.field>span{display:block;font-size:.9rem;color:var(--muted);margin-bottom:4px}
+input[type=text],input[type=date],input[type=time],select,textarea{width:100%;border:1px solid var(--line);background:var(--bg);
+  border-radius:10px;padding:10px 12px;min-height:44px}
+textarea{min-height:80px;resize:vertical}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;min-height:40px;font-weight:500}
+.chip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.tag{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.8rem;font-weight:500}
+.tag.ok{background:var(--ok-bg);color:var(--ok)}
+.tag.wait{background:var(--wait-bg);color:var(--wait)}
+.tag.bad{background:var(--bad-bg);color:var(--bad)}
+.tag.info{background:var(--accent-bg);color:var(--accent)}
+.hero{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px}
+.hero .big{font-size:2rem;font-weight:600;line-height:1.1}
+.hero .lead{color:var(--muted);margin-top:4px}
+.notice{border-radius:12px;padding:12px 14px;font-size:.95rem}
+.notice.bad{background:var(--bad-bg);color:var(--bad)}
+.notice.wait{background:var(--wait-bg);color:var(--wait)}
+.notice.ok{background:var(--ok-bg);color:var(--ok)}
+/* body map */
+.bodymap{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bodymap figure{margin:0;text-align:center}
+.bodymap figcaption{font-size:.85rem;color:var(--muted);margin-top:4px}
+.bodymap svg{width:100%;height:auto;max-height:52vh}
+.silhouette{fill:var(--line);opacity:.75}
+.mark{fill:var(--muted);stroke:var(--muted);opacity:.6}
+.zone{cursor:pointer;stroke:var(--surface);stroke-width:1.5;fill-opacity:.88;transition:opacity .15s}
+.zone.ok{fill:var(--ok)}.zone.wait{fill:var(--wait)}.zone.bad{fill:var(--bad)}
+.zone.sel{stroke:var(--ink);stroke-width:3}
+.zone:hover{opacity:.85}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.sitelist{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.siteitem{border:1px solid var(--line);border-radius:10px;padding:8px 10px;text-align:left;background:var(--surface);min-height:52px}
+.siteitem.sel{border-color:var(--accent);background:var(--accent-bg)}
+.siteitem .n{font-weight:500;display:block}
+.siteitem .d{font-size:.8rem;color:var(--muted)}
+/* log */
+.week{border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden}
+.week header{padding:10px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.entry{display:flex;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.entry:last-child{border-bottom:0}
+.entry .when{min-width:72px}
+.entry .when b{display:block;font-weight:600}
+.entry .when span{font-size:.85rem;color:var(--muted)}
+.entry .body{flex:1}
+.entry .actions{display:flex;flex-direction:column;gap:4px}
+.entry .actions button{border:0;background:none;color:var(--muted);padding:4px;font-size:.85rem}
+.entry .actions button:hover{color:var(--ink)}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+/* doctor */
+.symrow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;padding:10px 0;border-bottom:1px solid var(--line)}
+.symrow:last-child{border-bottom:0}
+.symrow .opts{display:flex;gap:6px;flex-wrap:wrap}
+.symrow .opts .chip{padding:5px 10px;min-height:32px;font-size:.85rem}
+.symrow textarea{min-height:40px;margin-top:6px;display:none}
+.symrow.on textarea{display:block}
+/* tabs */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);
+  padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-around;z-index:10}
+nav.tabs a{flex:1;max-width:120px;text-decoration:none;color:var(--muted);font-size:.78rem;text-align:center;padding:6px 4px;border-radius:10px}
+nav.tabs a svg{display:block;margin:0 auto 2px;width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav.tabs a.on{color:var(--accent);font-weight:600}
+/* modal */
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:center;z-index:20}
+.sheet.open{display:flex}
+.sheet .card{background:var(--surface);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;
+  padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);
+  padding:10px 16px;border-radius:999px;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s;z-index:30}
+.toast.show{opacity:1}
+.sevrow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
+.sevrow:last-child{border-bottom:0}
+.sevrow .seg{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.sevrow .seg button{border:0;background:var(--surface);padding:6px 10px;min-width:40px;font-size:.85rem;color:var(--muted)}
+.sevrow .seg button+button{border-left:1px solid var(--line)}
+.sevrow .seg button.on{background:var(--accent);color:var(--accent-ink)}
+.sevrow .seg button.on.s1{background:var(--ok)}.sevrow .seg button.on.s2{background:var(--wait)}.sevrow .seg button.on.s3{background:var(--bad)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+.report{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
+.report h2{margin-top:18px;font-size:1.05rem;border-bottom:1px solid var(--line);padding-bottom:4px}
+.report table{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:8px}
+.report th,.report td{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.report .kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.report .kpi{background:var(--bg);border-radius:10px;padding:10px}
+.report .kpi b{display:block;font-size:1.3rem}
+.report .kpi span{font-size:.8rem;color:var(--muted)}
+.tablewrap{overflow-x:auto}
+@media print{nav.tabs,header.top,.noprint{display:none!important}.app{padding:0;max-width:none}.report{border:0;padding:0}body{background:#fff;color:#000}:root{color-scheme:light}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div><h1 id="pageTitle"></h1><p class="sub" id="pageSub"></p></div>
+    <button class="btn" id="langBtn" style="min-height:36px;padding:6px 12px">EN</button>
+  </header>
+
+  <!-- TODAY -->
+  <section class="view stack" id="view-today">
+    <div class="hero">
+      <p class="lead" data-t="nextLabel"></p>
+      <p class="big" id="nextWhen">—</p>
+      <p class="lead" id="nextDetail"></p>
+    </div>
+    <div id="gapNotice"></div>
+    <div class="panel">
+      <div class="row between"><h2 data-t="suggestTitle"></h2><span class="tag info" id="suggestTag"></span></div>
+      <p class="muted small" data-t="suggestWhy"></p>
+      <p id="suggestSite" style="font-size:1.2rem;font-weight:600;margin-top:8px">—</p>
+      <button class="btn primary block" id="logNowBtn" style="margin-top:12px" data-t="logNow"></button>
+    </div>
+    <div class="panel tight">
+      <div class="row between"><span data-t="adherence"></span><b id="adherence">—</b></div>
+      <div class="row between" style="margin-top:6px"><span data-t="lastInj"></span><b id="lastInj">—</b></div>
+      <div class="row between" style="margin-top:6px"><span data-t="reactions"></span><b id="reactCount">—</b></div>
+    </div>
+    <div class="row">
+      <a class="btn grow" href="#report" data-t="viewReport"></a>
+      <a class="btn grow" id="calBtnToday" target="_blank" rel="noopener" data-t="addCal"></a>
+    </div>
+    <div class="panel tight small muted" data-t="disclaimer"></div>
+  </section>
+
+  <!-- SITES -->
+  <section class="view stack" id="view-sites">
+    <div class="legend">
+      <span><i style="background:var(--ok)"></i><span data-t="legendOk"></span></span>
+      <span><i style="background:var(--wait)"></i><span data-t="legendWait"></span></span>
+      <span><i style="background:var(--bad)"></i><span data-t="legendBad"></span></span>
+    </div>
+    <div class="panel">
+      <div class="bodymap" id="bodymap"></div>
+    </div>
+    <div class="panel" id="siteDetail"></div>
+    <div class="panel tight small muted" data-t="siteTips"></div>
+  </section>
+
+  <!-- LOG -->
+  <section class="view stack" id="view-log">
+    <button class="btn primary block" id="logAddBtn" data-t="addInj"></button>
+    <div id="weeks"></div>
+  </section>
+
+  <!-- HEALTH: diary + doctor -->
+  <section class="view stack" id="view-doctor">
+    <div>
+      <h2 data-t="diaryTitle"></h2>
+      <p class="muted small" data-t="diaryIntro"></p>
+    </div>
+    <button class="btn primary block" id="diaryAddBtn" data-t="addDiary"></button>
+    <div id="diaryList"></div>
+    <div style="margin-top:24px">
+      <h2 data-t="visitsTitle"></h2>
+      <p class="muted small" data-t="doctorIntro"></p>
+    </div>
+    <button class="btn block" id="visitAddBtn" data-t="newVisit"></button>
+    <div id="visits"></div>
+  </section>
+
+  <!-- REPORT -->
+  <section class="view stack" id="view-report">
+    <div class="row between noprint"><button class="btn" id="reportBack" data-t="back"></button>
+      <div class="row"><button class="btn" id="csvBtn" data-t="csvBtn"></button><button class="btn primary" id="pdfBtn" data-t="pdfBtn"></button></div></div>
+    <div id="reportBody" class="report"></div>
+  </section>
+
+  <!-- SETUP -->
+  <section class="view stack" id="view-setup">
+    <div class="panel stack">
+      <h2 data-t="schedule"></h2>
+      <label class="field"><span data-t="daysLabel"></span><div class="chips" id="dayChips"></div></label>
+      <label class="field"><span data-t="timeLabel"></span><input type="time" id="setTime"></label>
+      <label class="field"><span data-t="doseLabel"></span>
+        <select id="setDose"><option value="8.8">8.8 mcg</option><option value="22">22 mcg</option><option value="44">44 mcg</option></select></label>
+      <label class="field"><span data-t="deviceLabel"></span>
+        <select id="setDevice"><option value="rebidose">Rebidose</option><option value="rebismart">RebiSmart</option><option value="syringe">Syringe / Rebiject</option></select></label>
+      <label class="field"><span data-t="restLabel"></span>
+        <select id="setRest"><option value="5">5</option><option value="7" selected>7</option><option value="10">10</option><option value="14">14</option></select></label>
+      <label class="field"><span data-t="themeLabel"></span>
+        <select id="setTheme"><option value="auto" data-t="themeAuto"></option><option value="light" data-t="themeLight"></option><option value="dark" data-t="themeDark"></option></select></label>
+    </div>
+    <div class="panel stack">
+      <h2 data-t="remindTitle"></h2>
+      <p class="muted small" data-t="remindNote"></p>
+      <a class="btn primary block" id="calBtn" target="_blank" rel="noopener" data-t="addCal"></a>
+    </div>
+    <div class="panel stack">
+      <h2 data-t="reportTitle"></h2>
+      <p class="muted small" data-t="reportNote"></p>
+      <a class="btn block" href="#report" data-t="viewReport"></a>
+    </div>
+    <div class="panel stack">
+      <h2 data-t="dataTitle"></h2>
+      <p class="muted small" data-t="dataNote"></p>
+      <button class="btn block" id="exportBtn" data-t="exportBtn"></button>
+      <textarea id="importBox" rows="3" data-ph="importPh"></textarea>
+      <button class="btn block" id="importBtn" data-t="importBtn"></button>
+      <button class="btn danger block" id="clearBtn" data-t="clearBtn"></button>
+    </div>
+    <div class="panel tight small muted" data-t="installNote"></div>
+  </section>
+</div>
+
+<nav class="tabs" id="tabs">
+  <a href="#today" data-v="today"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span data-t="tabToday"></span></a>
+  <a href="#sites" data-v="sites"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.5"/><path d="M8 10h8l-1 6h-6zM9 16l-1 6M15 16l1 6"/></svg><span data-t="tabSites"></span></a>
+  <a href="#log" data-v="log"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span data-t="tabLog"></span></a>
+  <a href="#doctor" data-v="doctor"><svg viewBox="0 0 24 24"><path d="M9 3v6a3 3 0 0 0 6 0V3M6 3h2M14 3h2M12 12v4a4 4 0 0 0 8 0v-1"/><circle cx="20" cy="13" r="2"/></svg><span data-t="tabHealth"></span></a>
+  <a href="#setup" data-v="setup"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg><span data-t="tabSetup"></span></a>
+</nav>
+
+<!-- Injection sheet -->
+<div class="sheet" id="injSheet" role="dialog" aria-modal="true">
+  <div class="card stack">
+    <div class="row between"><h2 id="injSheetTitle"></h2><button class="btn" id="injCancel" style="min-height:36px" data-t="cancel"></button></div>
+    <input type="hidden" id="injId">
+    <div class="row">
+      <label class="field grow"><span data-t="dateLabel"></span><input type="date" id="injDate"></label>
+      <label class="field grow"><span data-t="timeLabel"></span><input type="time" id="injTime"></label>
+    </div>
+    <div class="field"><span data-t="siteLabel"></span><div class="sitelist" id="injSites"></div></div>
+    <div class="field"><span data-t="reactionLabel"></span>
+      <div class="chips"><button class="chip" id="reactNo" data-t="no"></button><button class="chip" id="reactYes" data-t="yes"></button></div>
+    </div>
+    <label class="field" id="reactDescWrap" style="display:none"><span data-t="reactionDesc"></span><textarea id="injReact" rows="2"></textarea></label>
+    <label class="field"><span data-t="noteLabel"></span><textarea id="injNote" rows="2" data-ph="notePh"></textarea></label>
+    <button class="btn primary block" id="injSave" data-t="save"></button>
+  </div>
+</div>
+
+<!-- Visit sheet -->
+<div class="sheet" id="visitSheet" role="dialog" aria-modal="true">
+  <div class="card stack">
+    <div class="row between"><h2 data-t="visitTitle"></h2><button class="btn" id="visitCancel" style="min-height:36px" data-t="cancel"></button></div>
+    <input type="hidden" id="visitId">
+    <label class="field"><span data-t="visitDate"></span><input type="date" id="visitDate"></label>
+    <div class="field"><span data-t="symptoms"></span><div id="symList"></div></div>
+    <label class="field"><span data-t="top3"></span><textarea id="visitTop3" rows="3"></textarea></label>
+    <label class="field"><span data-t="questions"></span><textarea id="visitQ" rows="3"></textarea></label>
+    <button class="btn primary block" id="visitSave" data-t="save"></button>
+  </div>
+</div>
+
+<!-- Diary sheet -->
+<div class="sheet" id="diarySheet" role="dialog" aria-modal="true">
+  <div class="card stack">
+    <div class="row between"><h2 id="diarySheetTitle"></h2><button class="btn" id="diaryCancel" style="min-height:36px" data-t="cancel"></button></div>
+    <input type="hidden" id="diaryId">
+    <label class="field"><span data-t="dateLabel"></span><input type="date" id="diaryDate"></label>
+    <div id="diarySyms"></div>
+    <label class="field"><span data-t="diaryNote"></span><textarea id="diaryNote" rows="2"></textarea></label>
+    <button class="btn primary block" id="diarySave" data-t="save"></button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- i18n ---------- */
+const T = {
+th:{
+  appTitle:"บันทึกการฉีดยา", appSub:"ฉีดสัปดาห์ละ 3 ครั้ง ห่างกันอย่างน้อย 48 ชม.",
+  tabToday:"วันนี้", tabSites:"ตำแหน่ง", tabLog:"ประวัติ", tabDoctor:"พบแพทย์", tabSetup:"ตั้งค่า",
+  nextLabel:"เข็มต่อไป", suggestTitle:"ตำแหน่งที่แนะนำ", suggestWhy:"เลือกจุดที่พักมานานที่สุดและพ้นระยะพักแล้ว",
+  logNow:"บันทึกการฉีด", adherence:"ฉีดครบ 4 สัปดาห์ล่าสุด", lastInj:"ฉีดครั้งล่าสุด", reactions:"ปฏิกิริยาที่จุดฉีด (30 วัน)",
+  disclaimer:"แอปนี้ช่วยจดบันทึกเท่านั้น ไม่ใช่คำแนะนำทางการแพทย์ ถ้าจุดฉีดบวม เจ็บมาก หรือดูติดเชื้อ ให้ติดต่อแพทย์ทันที",
+  legendOk:"พร้อมใช้", legendWait:"กำลังพัก", legendBad:"มีปฏิกิริยาล่าสุด",
+  siteTips:"หมุนเวียนตำแหน่งทุกครั้ง เว้นรอบสะดือ 5 ซม. ไม่ฉีดจุดที่แดง ช้ำ แข็ง หรือมีแผล",
+  addInj:"+ เพิ่มรายการฉีด", doctorIntro:"เตรียมตัวก่อนพบแพทย์: จดอาการที่เปลี่ยนไปและคำถามที่อยากถาม",
+  newVisit:"+ เตรียมนัดพบแพทย์ครั้งใหม่",
+  schedule:"ตารางฉีด", daysLabel:"วันที่ฉีด (เลือก 3 วัน)", timeLabel:"เวลา", doseLabel:"ขนาดยา", deviceLabel:"อุปกรณ์",
+  restLabel:"พักจุดเดิมอย่างน้อย (วัน)", themeLabel:"ธีม", themeAuto:"ตามระบบ", themeLight:"สว่าง", themeDark:"มืด",
+  dataTitle:"ข้อมูลของคุณ", dataNote:"ข้อมูลเก็บไว้ในเครื่องนี้เท่านั้น ส่งออกเป็นข้อความเพื่อสำรองหรือย้ายเครื่อง",
+  exportBtn:"คัดลอกข้อมูลสำรอง", importPh:"วางข้อมูลสำรองที่นี่", importBtn:"นำเข้าข้อมูล", clearBtn:"ลบข้อมูลทั้งหมด",
+  installNote:"ติดตั้งเป็นแอป: Android — เมนู Chrome › เพิ่มลงหน้าจอหลัก / iPhone — ปุ่มแชร์ใน Safari › เพิ่มลงหน้าจอโฮม",
+  cancel:"ยกเลิก", save:"บันทึก", dateLabel:"วันที่", siteLabel:"ตำแหน่งฉีด", reactionLabel:"มีปฏิกิริยาที่จุดฉีดไหม",
+  no:"ไม่มี", yes:"มี", reactionDesc:"อาการ (แดง บวม เจ็บ คัน ฯลฯ)", noteLabel:"บันทึกเพิ่มเติม",
+  notePh:"ผลข้างเคียง อาการ MS หรือเรื่องที่อยากคุยกับแพทย์",
+  newInj:"บันทึกการฉีด", editInj:"แก้ไขรายการ", visitTitle:"เตรียมพบแพทย์", visitDate:"วันนัด", symptoms:"อาการ",
+  top3:"3 เรื่องสำคัญที่จะคุย", questions:"คำถามที่อยากถาม",
+  week:"สัปดาห์", noEntries:"ยังไม่มีรายการ กดปุ่มด้านบนเพื่อเริ่มบันทึก", noVisits:"ยังไม่มีนัด",
+  edit:"แก้ไข", del:"ลบ", confirmDel:"ลบรายการนี้?", confirmClear:"ลบข้อมูลทั้งหมด? กู้คืนไม่ได้",
+  saved:"บันทึกแล้ว", deleted:"ลบแล้ว", copied:"คัดลอกแล้ว", imported:"นำเข้าแล้ว", importFail:"ข้อมูลไม่ถูกต้อง",
+  pickSite:"เลือกตำแหน่งก่อน", today:"วันนี้", tomorrow:"พรุ่งนี้", at:"เวลา", overdue:"เลยกำหนดแล้ว",
+  gapWarn:"ฉีดครั้งล่าสุดเมื่อ {h} ชม. ที่แล้ว ควรห่างอย่างน้อย 48 ชม.", gapOk:"ห่างจากเข็มล่าสุด {h} ชม. ฉีดได้",
+  neverUsed:"ยังไม่เคยใช้", daysAgo:"{d} วันก่อน", restingFor:"พักอีก {d} วัน", hadReaction:"มีปฏิกิริยาเมื่อ {d} วันก่อน",
+  front:"ด้านหน้า", back:"ด้านหลัง", none:"ไม่มี", of:"จาก", reactionMark:"ปฏิกิริยา", noSuggest:"ทุกจุดยังอยู่ในระยะพัก เลือกจุดที่พักนานที่สุด",
+  tapZone:"แตะจุดบนร่างกายเพื่อดูประวัติ", usedTimes:"ใช้ไป {n} ครั้ง", lastUsed:"ครั้งล่าสุด",
+  old:"เดิม", newS:"ใหม่", worse:"แย่ลง", symDesc:"รายละเอียด / นานแค่ไหน",
+  sites:{abdUL:"หน้าท้อง ซ้ายบน",abdUR:"หน้าท้อง ขวาบน",abdLL:"หน้าท้อง ซ้ายล่าง",abdLR:"หน้าท้อง ขวาล่าง",
+    thighLF:"ต้นขาซ้าย ด้านหน้า",thighLO:"ต้นขาซ้าย ด้านนอก",thighRF:"ต้นขาขวา ด้านหน้า",thighRO:"ต้นขาขวา ด้านนอก",
+    armL:"ต้นแขนซ้าย ด้านหลัง",armR:"ต้นแขนขวา ด้านหลัง",gluteL:"สะโพกซ้าย",gluteR:"สะโพกขวา"},
+  syms:["ความจำ สมาธิ การคิด","อารมณ์ซึมเศร้า / แปรปรวน","การมองเห็น","กล้ามเนื้อเกร็ง / กระตุก","อ่อนแรง","อ่อนเพลีย","ปวด","ชา / ความรู้สึกผิดปกติ","เดิน / ทรงตัว","ขับถ่าย / ปัสสาวะ","เรื่องเพศ","ไวต่อความร้อน","ไข้หวัดหลังฉีด"],
+  dow:["อา","จ","อ","พ","พฤ","ศ","ส"], dowLong:["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสบดี","ศุกร์","เสาร์"],
+  tabHealth:"อาการ", diaryTitle:"ไดอารี่อาการรายวัน", diaryIntro:"จดอาการวันละครั้ง จะได้เห็นว่าดีขึ้นหรือแย่ลงหลังฉีด",
+  addDiary:"+ จดอาการวันนี้", editDiary:"แก้ไขไดอารี่", noDiary:"ยังไม่มีบันทึก", diaryNote:"บันทึกเพิ่มเติม",
+  sev:["ไม่มี","เล็กน้อย","ปานกลาง","มาก"],
+  diarySyms:["ไข้ หนาวสั่น","ปวดเมื่อยตัว","อ่อนเพลีย","ปวดหัว","เจ็บ/แดงจุดฉีด","อารมณ์ซึม","ชา/อ่อนแรง","นอนไม่หลับ"],
+  visitsTitle:"เตรียมพบแพทย์", postInj:"หลังฉีด", remindTitle:"แจ้งเตือน", remindNote:"เพิ่มนัดฉีดยาซ้ำทุกสัปดาห์ลงปฏิทินมือถือ แอปปฏิทินจะแจ้งเตือนให้เอง (ตั้งเตือนล่วงหน้า 30 นาทีไว้ให้)",
+  addCal:"เพิ่มลง Google Calendar", pickDaysFirst:"เลือกวันฉีดก่อน",
+  reportTitle:"รายงานสำหรับแพทย์", reportNote:"สรุป 8 สัปดาห์ล่าสุด: การฉีด ปฏิกิริยา และอาการ",
+  csvBtn:"ดาวน์โหลด CSV", pdfBtn:"บันทึกเป็น PDF / พิมพ์", viewReport:"ดูรายงาน", downloadUnavailable:"ดาวน์โหลดไม่ได้ในหน้านี้ ลองคัดลอกข้อมูลสำรองแทน",
+  rInjections:"การฉีดทั้งหมด", rCompleted:"ฉีดครบ", rReactions:"ปฏิกิริยาจุดฉีด", rSites:"ตำแหน่งที่ใช้", rDiary:"อาการที่พบบ่อย", rDays:"วัน", rGenerated:"สร้างเมื่อ", rPeriod:"ช่วง", rDose:"ขนาดยา", rSchedule:"ตารางฉีด", rReactList:"รายการที่มีปฏิกิริยา", rNotes:"บันทึก", rSymDays:"วันที่มีอาการ", back:"กลับ"
+},
+en:{
+  appTitle:"Injection tracker", appSub:"3 injections a week, at least 48 hours apart",
+  tabToday:"Today", tabSites:"Sites", tabLog:"History", tabDoctor:"Doctor", tabSetup:"Setup",
+  nextLabel:"Next injection", suggestTitle:"Suggested site", suggestWhy:"The site rested longest and past its rest period",
+  logNow:"Log an injection", adherence:"Completed, last 4 weeks", lastInj:"Last injection", reactions:"Site reactions (30 days)",
+  disclaimer:"This app only keeps notes. It is not medical advice. If a site is swollen, very painful, or looks infected, contact your doctor.",
+  legendOk:"Ready", legendWait:"Resting", legendBad:"Recent reaction",
+  siteTips:"Rotate every time. Stay 5 cm from the navel. Never inject where skin is red, bruised, hard, or broken.",
+  addInj:"+ Add injection", doctorIntro:"Before a visit: note symptoms that changed and the questions you want to ask",
+  newVisit:"+ Prepare a new visit",
+  schedule:"Schedule", daysLabel:"Injection days (pick 3)", timeLabel:"Time", doseLabel:"Dose", deviceLabel:"Device",
+  restLabel:"Rest each site at least (days)", themeLabel:"Theme", themeAuto:"System", themeLight:"Light", themeDark:"Dark",
+  dataTitle:"Your data", dataNote:"Stored only on this device. Export as text to back up or move to another phone.",
+  exportBtn:"Copy backup", importPh:"Paste a backup here", importBtn:"Import", clearBtn:"Delete all data",
+  installNote:"Install as an app: Android — Chrome menu › Add to Home screen / iPhone — Safari share button › Add to Home Screen",
+  cancel:"Cancel", save:"Save", dateLabel:"Date", siteLabel:"Site", reactionLabel:"Any site reaction?",
+  no:"No", yes:"Yes", reactionDesc:"Describe (redness, swelling, pain, itch…)", noteLabel:"Notes",
+  notePh:"Side effects, MS symptoms, or things to raise with your doctor",
+  newInj:"Log injection", editInj:"Edit entry", visitTitle:"Doctor visit", visitDate:"Visit date", symptoms:"Symptoms",
+  top3:"Top 3 things to discuss", questions:"Questions to ask",
+  week:"Week", noEntries:"No entries yet. Tap the button above to start.", noVisits:"No visits yet",
+  edit:"Edit", del:"Delete", confirmDel:"Delete this entry?", confirmClear:"Delete all data? This cannot be undone.",
+  saved:"Saved", deleted:"Deleted", copied:"Copied", imported:"Imported", importFail:"That backup is not valid",
+  pickSite:"Pick a site first", today:"Today", tomorrow:"Tomorrow", at:"at", overdue:"Overdue",
+  gapWarn:"Last injection was {h} h ago. Keep at least 48 h between doses.", gapOk:"{h} h since the last dose. OK to inject.",
+  neverUsed:"Never used", daysAgo:"{d} days ago", restingFor:"Rest {d} more days", hadReaction:"Reaction {d} days ago",
+  front:"Front", back:"Back", none:"None", of:"of", reactionMark:"Reaction", noSuggest:"Every site is still resting. Use the one rested longest.",
+  tapZone:"Tap a zone on the body to see its history", usedTimes:"Used {n} times", lastUsed:"Last used",
+  old:"Old", newS:"New", worse:"Worse", symDesc:"Details / how long it lasted",
+  sites:{abdUL:"Abdomen, upper left",abdUR:"Abdomen, upper right",abdLL:"Abdomen, lower left",abdLR:"Abdomen, lower right",
+    thighLF:"Left thigh, front",thighLO:"Left thigh, outer",thighRF:"Right thigh, front",thighRO:"Right thigh, outer",
+    armL:"Left upper arm, back",armR:"Right upper arm, back",gluteL:"Left buttock",gluteR:"Right buttock"},
+  syms:["Memory, attention, thinking","Depression / mood swings","Vision","Muscle stiffness / spasms","Weakness","Fatigue","Pain","Numbness / odd sensations","Walking / balance","Bowel or bladder","Sexual issues","Heat sensitivity","Flu-like symptoms after injecting"],
+  dow:["Su","Mo","Tu","We","Th","Fr","Sa"], dowLong:["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+  tabHealth:"Symptoms", diaryTitle:"Daily symptom diary", diaryIntro:"One entry a day shows whether things improve or worsen after injections",
+  addDiary:"+ Log today", editDiary:"Edit diary entry", noDiary:"No entries yet", diaryNote:"Notes",
+  sev:["None","Mild","Moderate","Severe"],
+  diarySyms:["Fever / chills","Muscle aches","Fatigue","Headache","Injection-site pain","Low mood","Numbness / weakness","Poor sleep"],
+  visitsTitle:"Doctor visit prep", postInj:"after injection", remindTitle:"Reminders", remindNote:"Add a weekly repeating injection event to your phone calendar; the calendar app will notify you (30-minute alert included)",
+  addCal:"Add to Google Calendar", pickDaysFirst:"Pick injection days first",
+  reportTitle:"Report for your doctor", reportNote:"Last 8 weeks: injections, reactions, and symptoms",
+  csvBtn:"Download CSV", pdfBtn:"Save as PDF / print", viewReport:"View report", downloadUnavailable:"Downloads are unavailable here. Use the backup copy instead.",
+  rInjections:"Total injections", rCompleted:"Completed", rReactions:"Site reactions", rSites:"Sites used", rDiary:"Frequent symptoms", rDays:"days", rGenerated:"Generated", rPeriod:"Period", rDose:"Dose", rSchedule:"Schedule", rReactList:"Entries with reactions", rNotes:"Notes", rSymDays:"Days with symptoms", back:"Back"
+}};
+const SITE_IDS = ["abdUL","abdUR","abdLL","abdLR","thighLF","thighLO","thighRF","thighRO","armL","armR","gluteL","gluteR"];
+
+/* ---------- state ---------- */
+const KEY = "injection-tracker-v1";
+let S = { lang:"th", days:[1,3,5], time:"20:00", dose:"44", device:"rebidose", rest:7, theme:"auto", injections:[], visits:[], diary:[] };
+function load(){ try{ const raw = localStorage.getItem(KEY); if(raw){ const o = JSON.parse(raw); S = Object.assign(S, o); } }catch(e){} }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+const t = k => (T[S.lang][k] ?? T.en[k] ?? k);
+const fmt = (s,o) => s.replace(/\{(\w+)\}/g,(_,k)=>o[k]);
+const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+
+/* ---------- date helpers ---------- */
+const pad = n => String(n).padStart(2,"0");
+const isoDate = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const nowIso = () => isoDate(new Date());
+const toDate = (dateStr,timeStr="00:00") => new Date(`${dateStr}T${timeStr}:00`);
+const daysBetween = (a,b) => Math.floor((b-a)/86400000);
+function weekStart(d){ const x=new Date(d); const day=(x.getDay()+6)%7; x.setDate(x.getDate()-day); x.setHours(0,0,0,0); return x; }
+function fmtDate(dateStr){ const d=toDate(dateStr); return `${t("dow")[d.getDay()]} ${d.getDate()}/${d.getMonth()+1}`; }
+function fmtDateLong(dateStr){ const d=toDate(dateStr); return d.toLocaleDateString(S.lang==="th"?"th-TH":"en-GB",{day:"numeric",month:"short",year:"numeric"}); }
+
+/* ---------- derived ---------- */
+function sortedInj(){ return [...S.injections].sort((a,b)=> toDate(b.date,b.time)-toDate(a.date,a.time)); }
+function siteInfo(id){
+  const list = sortedInj().filter(i=>i.site===id);
+  const last = list[0];
+  const now = new Date();
+  const lastReact = list.find(i=>i.reaction);
+  const dLast = last ? daysBetween(toDate(last.date,last.time), now) : null;
+  const dReact = lastReact ? daysBetween(toDate(lastReact.date,lastReact.time), now) : null;
+  let status = "ok";
+  if (dReact !== null && dReact < 14) status = "bad";
+  else if (dLast !== null && dLast < S.rest) status = "wait";
+  return { last, dLast, dReact, status, count:list.length };
+}
+function suggestSite(){
+  const infos = SITE_IDS.map(id=>({id,...siteInfo(id)}));
+  const ready = infos.filter(i=>i.status==="ok");
+  const pool = ready.length ? ready : infos.filter(i=>i.status!=="bad");
+  pool.sort((a,b)=> (a.dLast===null?1e9:a.dLast) < (b.dLast===null?1e9:b.dLast) ? 1 : -1);
+  return { site: pool[0] ? pool[0].id : null, allResting: ready.length===0 };
+}
+function nextDue(){
+  if(!S.days.length) return null;
+  const now = new Date();
+  const [hh,mm] = S.time.split(":").map(Number);
+  for(let add=0; add<8; add++){
+    const d = new Date(now); d.setDate(d.getDate()+add); d.setHours(hh,mm,0,0);
+    if(!S.days.includes(d.getDay())) continue;
+    const already = S.injections.some(i=>i.date===isoDate(d));
+    if(already) continue;
+    return { d, add };
+  }
+  return null;
+}
+function adherence(){
+  const now = new Date(); const start = weekStart(now); start.setDate(start.getDate()-21);
+  const done = S.injections.filter(i=> toDate(i.date) >= start && toDate(i.date) <= now).length;
+  // expected = scheduled days from start up to today
+  let exp=0; for(let d=new Date(start); d<=now; d.setDate(d.getDate()+1)) if(S.days.includes(d.getDay())) exp++;
+  return {done, exp};
+}
+
+/* ---------- rendering ---------- */
+function applyText(){
+  document.documentElement.lang = S.lang;
+  document.querySelectorAll("[data-t]").forEach(el=> el.textContent = t(el.dataset.t));
+  document.querySelectorAll("[data-ph]").forEach(el=> el.placeholder = t(el.dataset.ph));
+  document.getElementById("langBtn").textContent = S.lang==="th" ? "EN" : "ไทย";
+}
+function applyTheme(){
+  if(S.theme==="auto") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme", S.theme);
+}
+function renderToday(){
+  const nd = nextDue();
+  const el = document.getElementById("nextWhen"), det = document.getElementById("nextDetail");
+  if(!nd){ el.textContent="—"; det.textContent=""; }
+  else{
+    const label = nd.add===0 ? t("today") : nd.add===1 ? t("tomorrow") : t("dowLong")[nd.d.getDay()];
+    el.textContent = `${label} ${t("at")} ${S.time}`;
+    const past = nd.add===0 && nd.d < new Date();
+    det.textContent = `${t("dowLong")[nd.d.getDay()]} ${nd.d.getDate()}/${nd.d.getMonth()+1}` + (past ? ` · ${t("overdue")}` : "");
+  }
+  const last = sortedInj()[0];
+  const gap = document.getElementById("gapNotice");
+  if(last){
+    const h = Math.floor((new Date()-toDate(last.date,last.time))/3600000);
+    gap.innerHTML = `<div class="notice ${h<48?"wait":"ok"}">${fmt(t(h<48?"gapWarn":"gapOk"),{h})}</div>`;
+    document.getElementById("lastInj").textContent = `${fmtDate(last.date)} ${last.time} · ${t("sites")[last.site]}`;
+  } else { gap.innerHTML=""; document.getElementById("lastInj").textContent="—"; }
+  const sg = suggestSite();
+  document.getElementById("suggestSite").textContent = sg.site ? t("sites")[sg.site] : "—";
+  document.getElementById("suggestTag").textContent = sg.allResting ? t("legendWait") : t("legendOk");
+  document.getElementById("suggestTag").className = "tag " + (sg.allResting?"wait":"ok");
+  document.querySelector("#view-today .panel .muted").textContent = sg.allResting ? t("noSuggest") : t("suggestWhy");
+  const a = adherence();
+  document.getElementById("adherence").textContent = a.exp ? `${Math.min(a.done,a.exp)} ${t("of")} ${a.exp} (${Math.round(Math.min(100,a.done/a.exp*100))}%)` : "—";
+  const cut = new Date(); cut.setDate(cut.getDate()-30);
+  document.getElementById("reactCount").textContent = S.injections.filter(i=>i.reaction && toDate(i.date)>=cut).length;
+}
+
+/* body map SVG — simplified front / back silhouettes with tappable zones */
+const BODY = {
+  front:`<svg viewBox="0 0 200 420" xmlns="http://www.w3.org/2000/svg" aria-label="front">
+    <g class="silhouette">
+     <ellipse cx="100" cy="34" rx="18" ry="22"/>
+     <path d="M92 54 C 92 62, 108 62, 108 54 L 109 66 L 91 66 Z"/>
+     <path d="M100 66 C 80 66, 64 70, 58 80 C 54 88, 56 100, 58 112 C 62 130, 64 150, 62 168 C 60 185, 58 200, 60 215 C 64 228, 80 236, 100 236 C 120 236, 136 228, 140 215 C 142 200, 140 185, 138 168 C 136 150, 138 130, 142 112 C 144 100, 146 88, 142 80 C 136 70, 120 66, 100 66 Z"/>
+     <path d="M60 78 C 48 82, 40 92, 38 108 L 30 170 C 28 184, 26 196, 28 206 C 30 214, 40 214, 42 206 C 46 190, 50 170, 54 150 C 56 136, 58 120, 58 110 C 58 98, 60 88, 60 78 Z"/>
+     <path d="M140 78 C 152 82, 160 92, 162 108 L 170 170 C 172 184, 174 196, 172 206 C 170 214, 160 214, 158 206 C 154 190, 150 170, 146 150 C 144 136, 142 120, 142 110 C 142 98, 140 88, 140 78 Z"/>
+     <path d="M62 214 C 58 250, 60 290, 66 325 C 68 345, 68 370, 70 395 C 70 404, 76 410, 86 410 C 92 410, 94 405, 92 398 C 94 370, 96 345, 96 325 C 98 295, 98 260, 98 236 C 86 238, 72 232, 62 214 Z"/>
+     <path d="M138 214 C 142 250, 140 290, 134 325 C 132 345, 132 370, 130 395 C 130 404, 124 410, 114 410 C 108 410, 106 405, 108 398 C 106 370, 104 345, 104 325 C 102 295, 102 260, 102 236 C 114 238, 128 232, 138 214 Z"/>
+    </g>
+    <circle cx="100" cy="176" r="2.5" class="mark"/>
+    <path class="zone" data-site="abdUR" d="M70 146 C 70 140, 76 138, 82 138 L 94 138 L 94 170 L 78 170 C 72 170, 70 166, 70 160 Z"/>
+    <path class="zone" data-site="abdUL" d="M106 138 L 118 138 C 124 138, 130 140, 130 146 L 130 160 C 130 166, 128 170, 122 170 L 106 170 Z"/>
+    <path class="zone" data-site="abdLR" d="M70 182 L 94 182 L 94 214 L 84 214 C 76 214, 70 208, 70 200 Z"/>
+    <path class="zone" data-site="abdLL" d="M106 182 L 130 182 L 130 200 C 130 208, 124 214, 116 214 L 106 214 Z"/>
+    <path class="zone" data-site="thighRF" d="M74 246 C 74 240, 80 236, 86 236 L 96 236 L 96 318 C 90 326, 78 326, 74 318 Z"/>
+    <path class="zone" data-site="thighRO" d="M62 244 C 62 238, 64 234, 68 234 L 70 234 L 70 318 C 68 324, 64 324, 64 318 Z"/>
+    <path class="zone" data-site="thighLF" d="M104 236 L 114 236 C 120 236, 126 240, 126 246 L 126 318 C 122 326, 110 326, 104 318 Z"/>
+    <path class="zone" data-site="thighLO" d="M130 234 L 132 234 C 136 234, 138 238, 138 244 L 136 318 C 136 324, 132 324, 130 318 Z"/>
+  </svg>`,
+  back:`<svg viewBox="0 0 200 420" xmlns="http://www.w3.org/2000/svg" aria-label="back">
+    <g class="silhouette">
+     <ellipse cx="100" cy="34" rx="18" ry="22"/>
+     <path d="M92 54 C 92 62, 108 62, 108 54 L 109 66 L 91 66 Z"/>
+     <path d="M100 66 C 80 66, 64 70, 58 80 C 54 88, 56 100, 58 112 C 62 130, 64 150, 62 168 C 60 185, 58 200, 60 215 C 64 228, 80 236, 100 236 C 120 236, 136 228, 140 215 C 142 200, 140 185, 138 168 C 136 150, 138 130, 142 112 C 144 100, 146 88, 142 80 C 136 70, 120 66, 100 66 Z"/>
+     <path d="M60 78 C 48 82, 40 92, 38 108 L 30 170 C 28 184, 26 196, 28 206 C 30 214, 40 214, 42 206 C 46 190, 50 170, 54 150 C 56 136, 58 120, 58 110 C 58 98, 60 88, 60 78 Z"/>
+     <path d="M140 78 C 152 82, 160 92, 162 108 L 170 170 C 172 184, 174 196, 172 206 C 170 214, 160 214, 158 206 C 154 190, 150 170, 146 150 C 144 136, 142 120, 142 110 C 142 98, 140 88, 140 78 Z"/>
+     <path d="M62 214 C 58 250, 60 290, 66 325 C 68 345, 68 370, 70 395 C 70 404, 76 410, 86 410 C 92 410, 94 405, 92 398 C 94 370, 96 345, 96 325 C 98 295, 98 260, 98 236 C 86 238, 72 232, 62 214 Z"/>
+     <path d="M138 214 C 142 250, 140 290, 134 325 C 132 345, 132 370, 130 395 C 130 404, 124 410, 114 410 C 108 410, 106 405, 108 398 C 106 370, 104 345, 104 325 C 102 295, 102 260, 102 236 C 114 238, 128 232, 138 214 Z"/>
+    </g>
+    <path d="M100 70 L100 200" class="mark" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+    <path class="zone" data-site="armL" d="M44 96 C 50 92, 56 96, 56 104 L 52 150 C 50 158, 42 158, 40 150 L 42 110 C 42 104, 42 98, 44 96 Z"/>
+    <path class="zone" data-site="armR" d="M156 96 C 150 92, 144 96, 144 104 L 148 150 C 150 158, 158 158, 160 150 L 158 110 C 158 104, 158 98, 156 96 Z"/>
+    <path class="zone" data-site="gluteL" d="M64 200 C 64 190, 76 186, 94 190 L 96 226 C 84 234, 68 232, 64 222 Z"/>
+    <path class="zone" data-site="gluteR" d="M136 200 C 136 190, 124 186, 106 190 L 104 226 C 116 234, 132 232, 136 222 Z"/>
+  </svg>`
+};
+let selSite = null;
+function renderSites(){
+  const bm = document.getElementById("bodymap");
+  bm.innerHTML = `<figure>${BODY.front}<figcaption>${t("front")}</figcaption></figure><figure>${BODY.back}<figcaption>${t("back")}</figcaption></figure>`;
+  bm.querySelectorAll(".zone").forEach(z=>{
+    const info = siteInfo(z.dataset.site);
+    z.classList.add(info.status); z.setAttribute("tabindex","0"); z.setAttribute("role","button");
+    z.setAttribute("aria-label", t("sites")[z.dataset.site]);
+    if(z.dataset.site===selSite) z.classList.add("sel");
+    const go = ()=>{ selSite = z.dataset.site; renderSites(); };
+    z.addEventListener("click", go);
+    z.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();go();} });
+  });
+  const d = document.getElementById("siteDetail");
+  if(!selSite){ d.innerHTML = `<p class="muted">${t("tapZone")}</p>`; return; }
+  const info = siteInfo(selSite);
+  const hist = sortedInj().filter(i=>i.site===selSite).slice(0,6);
+  let statusText = info.status==="bad" ? fmt(t("hadReaction"),{d:info.dReact})
+    : info.status==="wait" ? fmt(t("restingFor"),{d:S.rest-info.dLast}) : (info.dLast===null ? t("neverUsed") : fmt(t("daysAgo"),{d:info.dLast}));
+  d.innerHTML = `<div class="row between"><h2>${t("sites")[selSite]}</h2><span class="tag ${info.status}">${statusText}</span></div>
+    <p class="muted small">${fmt(t("usedTimes"),{n:info.count})}</p>
+    ${hist.length ? `<div style="margin-top:8px">${hist.map(i=>`<div class="row between small" style="padding:4px 0;border-top:1px solid var(--line)">
+      <span>${fmtDate(i.date)} ${i.time}</span>${i.reaction?`<span class="tag bad">${t("reactionMark")}</span>`:""}</div>`).join("")}</div>`:""}
+    <button class="btn primary block" style="margin-top:12px" onclick="openInj(null,'${selSite}')">${t("logNow")}</button>`;
+}
+function renderLog(){
+  const w = document.getElementById("weeks");
+  const list = sortedInj();
+  if(!list.length){ w.innerHTML = `<div class="panel empty">${t("noEntries")}</div>`; return; }
+  const groups = new Map();
+  list.forEach(i=>{ const k = isoDate(weekStart(toDate(i.date))); if(!groups.has(k)) groups.set(k,[]); groups.get(k).push(i); });
+  w.innerHTML = [...groups.entries()].map(([k,items])=>{
+    const ws = toDate(k), we = new Date(ws); we.setDate(we.getDate()+6);
+    const target = S.days.length||3;
+    return `<div class="week" style="margin-top:12px"><header><span>${t("week")} ${ws.getDate()}/${ws.getMonth()+1} – ${we.getDate()}/${we.getMonth()+1}</span>
+      <span class="tag ${items.length>=target?"ok":"wait"}">${items.length}/${target}</span></header>
+      ${items.map(i=>`<div class="entry"><div class="when"><b>${fmtDate(i.date)}</b><span>${i.time}</span></div>
+        <div class="body"><div>${t("sites")[i.site]||"—"} ${i.reaction?`<span class="tag bad">${t("reactionMark")}</span>`:""}</div>
+        ${i.reaction&&i.reactNote?`<div class="small" style="color:var(--bad)">${esc(i.reactNote)}</div>`:""}
+        ${i.note?`<div class="small muted">${esc(i.note)}</div>`:""}</div>
+        <div class="actions"><button onclick="openInj('${i.id}')">${t("edit")}</button><button onclick="delInj('${i.id}')">${t("del")}</button></div></div>`).join("")}
+    </div>`;
+  }).join("");
+}
+function renderVisits(){
+  const v = document.getElementById("visits");
+  const list = [...S.visits].sort((a,b)=>b.date.localeCompare(a.date));
+  if(!list.length){ v.innerHTML = `<div class="panel empty">${t("noVisits")}</div>`; return; }
+  v.innerHTML = list.map(vi=>{
+    const syms = Object.entries(vi.syms||{}).filter(([,s])=>s.on);
+    return `<div class="panel" style="margin-top:12px"><div class="row between"><h2>${fmtDateLong(vi.date)}</h2>
+      <div class="row"><button class="btn" style="min-height:36px;padding:6px 10px" onclick="openVisit('${vi.id}')">${t("edit")}</button>
+      <button class="btn danger" style="min-height:36px;padding:6px 10px" onclick="delVisit('${vi.id}')">${t("del")}</button></div></div>
+      ${syms.length?`<div class="chips" style="margin-top:8px">${syms.map(([i,s])=>`<span class="tag ${s.worse?"bad":"info"}">${t("syms")[i]}${s.status==="new"?" · "+t("newS"):""}${s.worse?" · "+t("worse"):""}</span>`).join("")}</div>`:`<p class="muted small" style="margin-top:6px">${t("symptoms")}: ${t("none")}</p>`}
+      ${vi.top3?`<p style="margin-top:8px"><b>${t("top3")}</b><br>${esc(vi.top3).replace(/\n/g,"<br>")}</p>`:""}
+      ${vi.q?`<p style="margin-top:8px"><b>${t("questions")}</b><br>${esc(vi.q).replace(/\n/g,"<br>")}</p>`:""}</div>`;
+  }).join("");
+}
+function sevColor(n){ return n===1?"var(--ok)":n===2?"var(--wait)":"var(--bad)"; }
+function renderDiary(){
+  const box = document.getElementById("diaryList");
+  const list = [...S.diary].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,30);
+  if(!list.length){ box.innerHTML = `<div class="panel empty">${t("noDiary")}</div>`; return; }
+  box.innerHTML = `<div class="week">${list.map(d=>{
+    const items = Object.entries(d.items||{}).filter(([,v])=>v>0);
+    const injDay = S.injections.some(i=>i.date===d.date);
+    return `<div class="entry"><div class="when"><b>${fmtDate(d.date)}</b>${injDay?`<span>💉 ${t("postInj")}</span>`:""}</div>
+      <div class="body"><div class="chips" style="gap:6px">${items.length?items.map(([i,v])=>`<span class="tag" style="background:var(--bg)"><i class="dot" style="background:${sevColor(v)}"></i>${t("diarySyms")[i]} · ${t("sev")[v]}</span>`).join(""):`<span class="muted small">${t("sev")[0]}</span>`}</div>
+      ${d.note?`<div class="small muted" style="margin-top:4px">${esc(d.note)}</div>`:""}</div>
+      <div class="actions"><button onclick="openDiary('${d.id}')">${t("edit")}</button><button onclick="delDiary('${d.id}')">${t("del")}</button></div></div>`; }).join("")}</div>`;
+}
+function calLink(){
+  if(!S.days.length) return null;
+  const by = ["SU","MO","TU","WE","TH","FR","SA"];
+  const nd = nextDue(); const start = nd ? new Date(nd.d) : new Date();
+  const [hh,mm] = S.time.split(":").map(Number); start.setHours(hh,mm,0,0);
+  const end = new Date(start.getTime()+30*60000);
+  const f = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+  const title = S.lang==="th" ? "ฉีดยา" : "Injection";
+  const details = S.lang==="th" ? "เอายาออกจากตู้เย็น 30 นาทีก่อนฉีด หมุนเวียนตำแหน่ง" : "Take out of the fridge 30 min before. Rotate sites.";
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${f(start)}/${f(end)}&recur=${encodeURIComponent("RRULE:FREQ=WEEKLY;BYDAY="+S.days.map(d=>by[d]).join(","))}&details=${encodeURIComponent(details)}`;
+}
+function renderCal(){
+  const link = calLink();
+  ["calBtn","calBtnToday"].forEach(id=>{ const a=document.getElementById(id); if(link){ a.href=link; a.removeAttribute("aria-disabled"); a.style.opacity=""; } else { a.removeAttribute("href"); a.setAttribute("aria-disabled","true"); a.style.opacity=".5"; a.onclick=()=>toast(t("pickDaysFirst")); } });
+}
+function reportData(){
+  const now = new Date(); const start = weekStart(now); start.setDate(start.getDate()-49);
+  const inj = sortedInj().filter(i=>toDate(i.date)>=start).reverse();
+  const diary = [...S.diary].filter(d=>toDate(d.date)>=start).sort((a,b)=>a.date.localeCompare(b.date));
+  let exp=0; for(let d=new Date(start); d<=now; d.setDate(d.getDate()+1)) if(S.days.includes(d.getDay())) exp++;
+  const siteCount = {}; inj.forEach(i=>siteCount[i.site]=(siteCount[i.site]||0)+1);
+  const symCount = {}; diary.forEach(d=>Object.entries(d.items||{}).forEach(([k,v])=>{ if(v>0) symCount[k]=(symCount[k]||0)+1; }));
+  return {start, now, inj, diary, exp, siteCount, symCount};
+}
+function renderReport(){
+  const r = reportData();
+  const dev = {rebidose:"Rebidose",rebismart:"RebiSmart",syringe:"Syringe / Rebiject"}[S.device]||S.device;
+  const dl = S.lang==="th"?"th-TH":"en-GB";
+  document.getElementById("reportBody").innerHTML = `
+    <h1 style="font-size:1.3rem">${t("reportTitle")}</h1>
+    <p class="muted small">${t("rPeriod")}: ${r.start.toLocaleDateString(dl)} – ${r.now.toLocaleDateString(dl)} · ${t("rGenerated")} ${r.now.toLocaleDateString(dl)}</p>
+    <p class="small" style="margin-top:6px">${t("rDose")}: ${S.dose} mcg · ${dev} · ${t("rSchedule")}: ${S.days.map(d=>t("dow")[d]).join("/")} ${S.time}</p>
+    <div class="kpis">
+      <div class="kpi"><b>${r.inj.length}</b><span>${t("rInjections")}</span></div>
+      <div class="kpi"><b>${r.exp?Math.round(Math.min(100,r.inj.length/r.exp*100)):0}%</b><span>${t("rCompleted")} (${Math.min(r.inj.length,r.exp)}/${r.exp})</span></div>
+      <div class="kpi"><b>${r.inj.filter(i=>i.reaction).length}</b><span>${t("rReactions")}</span></div>
+      <div class="kpi"><b>${Object.keys(r.siteCount).length}/12</b><span>${t("rSites")}</span></div>
+    </div>
+    <h2>${t("rReactList")}</h2>
+    ${r.inj.filter(i=>i.reaction).length?`<div class="tablewrap"><table><tr><th>${t("dateLabel")}</th><th>${t("siteLabel")}</th><th>${t("reactionDesc")}</th></tr>
+      ${r.inj.filter(i=>i.reaction).map(i=>`<tr><td>${fmtDate(i.date)}</td><td>${t("sites")[i.site]}</td><td>${esc(i.reactNote||"")}</td></tr>`).join("")}</table></div>`:`<p class="muted small">${t("none")}</p>`}
+    <h2>${t("rDiary")}</h2>
+    ${Object.keys(r.symCount).length?`<div class="tablewrap"><table>${Object.entries(r.symCount).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`<tr><td>${t("diarySyms")[k]}</td><td>${n} ${t("rDays")}</td></tr>`).join("")}</table></div>`:`<p class="muted small">${t("none")}</p>`}
+    <h2>${t("tabLog")}</h2>
+    <div class="tablewrap"><table><tr><th>${t("dateLabel")}</th><th>${t("timeLabel")}</th><th>${t("siteLabel")}</th><th>${t("reactionMark")}</th><th>${t("rNotes")}</th></tr>
+      ${r.inj.map(i=>`<tr><td>${fmtDate(i.date)}</td><td>${i.time}</td><td>${t("sites")[i.site]}</td><td>${i.reaction?t("yes"):""}</td><td>${esc(i.note||"")}</td></tr>`).join("")||`<tr><td colspan="5" class="muted">${t("none")}</td></tr>`}</table></div>
+    ${r.diary.length?`<h2>${t("diaryTitle")}</h2><div class="tablewrap"><table>${r.diary.map(d=>{ const items=Object.entries(d.items||{}).filter(([,v])=>v>0);
+      return `<tr><td style="white-space:nowrap">${fmtDate(d.date)}</td><td>${items.map(([i,v])=>`${t("diarySyms")[i]} (${t("sev")[v]})`).join(", ")}${d.note?`<br><span class="muted">${esc(d.note)}</span>`:""}</td></tr>`; }).join("")}</table></div>`:""}`;
+}
+function csvText(){
+  const q = v => `"${String(v??"").replace(/"/g,'""')}"`;
+  const rows = [["type","date","time","site","reaction","reaction_note","note"]];
+  sortedInj().reverse().forEach(i=>rows.push(["injection",i.date,i.time,T.en.sites[i.site]||i.site,i.reaction?"yes":"no",i.reactNote||"",i.note||""]));
+  [...S.diary].sort((a,b)=>a.date.localeCompare(b.date)).forEach(d=>{
+    const items = Object.entries(d.items||{}).filter(([,v])=>v>0).map(([i,v])=>`${T.en.diarySyms[i]}=${v}`).join("; ");
+    rows.push(["symptoms",d.date,"","","",items,d.note||""]); });
+  return "\ufeff"+rows.map(r=>r.map(q).join(",")).join("\n");
+}
+document.getElementById("csvBtn").onclick = async ()=>{
+  const dl = window.claude ? await claude.use("downloads") : null;
+  if(!dl){ toast(t("downloadUnavailable")); return; }
+  try{ await dl.save({filename:`injection-log-${nowIso()}.csv`, data: csvText()}); }
+  catch(e){ if(e && e.code!=="declined") toast(t("downloadUnavailable")); }
+};
+document.getElementById("pdfBtn").onclick = ()=> window.print();
+document.getElementById("reportBack").onclick = ()=> history.length>1 ? history.back() : (location.hash="#today");
+
+function renderSetup(){
+  const dc = document.getElementById("dayChips");
+  dc.innerHTML = [1,2,3,4,5,6,0].map(d=>`<button type="button" class="chip ${S.days.includes(d)?"on":""}" data-d="${d}">${t("dow")[d]}</button>`).join("");
+  dc.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{ const d=+c.dataset.d; S.days = S.days.includes(d) ? S.days.filter(x=>x!==d) : [...S.days,d].sort(); save(); renderSetup(); renderToday(); });
+  document.getElementById("setTime").value = S.time;
+  document.getElementById("setDose").value = S.dose;
+  document.getElementById("setDevice").value = S.device;
+  document.getElementById("setRest").value = String(S.rest);
+  document.getElementById("setTheme").value = S.theme;
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function renderAll(){ applyText(); renderToday(); renderSites(); renderLog(); renderVisits(); renderDiary(); renderSetup(); renderCal(); if(location.hash==="#report") renderReport(); }
+
+/* ---------- injection sheet ---------- */
+let injReaction = false, injSite = null;
+function openInj(id, presetSite){
+  const sheet = document.getElementById("injSheet");
+  const e = id ? S.injections.find(i=>i.id===id) : null;
+  document.getElementById("injSheetTitle").textContent = e ? t("editInj") : t("newInj");
+  document.getElementById("injId").value = e ? e.id : "";
+  document.getElementById("injDate").value = e ? e.date : nowIso();
+  document.getElementById("injTime").value = e ? e.time : (new Date().getHours()>=S.time.split(":")[0]-1 ? S.time : `${pad(new Date().getHours())}:${pad(new Date().getMinutes())}`);
+  injSite = e ? e.site : (presetSite || suggestSite().site);
+  injReaction = e ? !!e.reaction : false;
+  document.getElementById("injReact").value = e ? (e.reactNote||"") : "";
+  document.getElementById("injNote").value = e ? (e.note||"") : "";
+  renderInjSites(); renderReactToggle();
+  sheet.classList.add("open");
+}
+function renderInjSites(){
+  const box = document.getElementById("injSites");
+  box.innerHTML = SITE_IDS.map(id=>{ const info = siteInfo(id);
+    const d = info.status==="bad" ? fmt(t("hadReaction"),{d:info.dReact}) : info.status==="wait" ? fmt(t("restingFor"),{d:S.rest-info.dLast}) : (info.dLast===null?t("neverUsed"):fmt(t("daysAgo"),{d:info.dLast}));
+    return `<button type="button" class="siteitem ${id===injSite?"sel":""}" data-site="${id}"><span class="n">${t("sites")[id]}</span><span class="d" style="color:var(--${info.status==="ok"?"ok":info.status})">${d}</span></button>`; }).join("");
+  box.querySelectorAll(".siteitem").forEach(b=>b.onclick=()=>{ injSite=b.dataset.site; renderInjSites(); });
+}
+function renderReactToggle(){
+  document.getElementById("reactNo").classList.toggle("on",!injReaction);
+  document.getElementById("reactYes").classList.toggle("on",injReaction);
+  document.getElementById("reactDescWrap").style.display = injReaction ? "block" : "none";
+}
+document.getElementById("reactNo").onclick = ()=>{ injReaction=false; renderReactToggle(); };
+document.getElementById("reactYes").onclick = ()=>{ injReaction=true; renderReactToggle(); };
+document.getElementById("injCancel").onclick = ()=> document.getElementById("injSheet").classList.remove("open");
+document.getElementById("injSave").onclick = ()=>{
+  if(!injSite){ toast(t("pickSite")); return; }
+  const id = document.getElementById("injId").value;
+  const rec = { id: id||uid(), date: document.getElementById("injDate").value||nowIso(), time: document.getElementById("injTime").value||S.time,
+    site: injSite, reaction: injReaction, reactNote: injReaction ? document.getElementById("injReact").value.trim() : "", note: document.getElementById("injNote").value.trim() };
+  if(id){ S.injections = S.injections.map(i=>i.id===id?rec:i); } else S.injections.push(rec);
+  save(); document.getElementById("injSheet").classList.remove("open"); renderAll(); toast(t("saved"));
+};
+function delInj(id){ if(!confirm(t("confirmDel"))) return; S.injections = S.injections.filter(i=>i.id!==id); save(); renderAll(); toast(t("deleted")); }
+document.getElementById("logNowBtn").onclick = ()=>openInj(null);
+document.getElementById("logAddBtn").onclick = ()=>openInj(null);
+
+/* ---------- visit sheet ---------- */
+let visitSyms = {};
+function openVisit(id){
+  const v = id ? S.visits.find(x=>x.id===id) : null;
+  document.getElementById("visitId").value = v ? v.id : "";
+  document.getElementById("visitDate").value = v ? v.date : nowIso();
+  document.getElementById("visitTop3").value = v ? (v.top3||"") : "";
+  document.getElementById("visitQ").value = v ? (v.q||"") : "";
+  visitSyms = v ? JSON.parse(JSON.stringify(v.syms||{})) : {};
+  renderSymList();
+  document.getElementById("visitSheet").classList.add("open");
+}
+function renderSymList(){
+  const box = document.getElementById("symList");
+  box.innerHTML = t("syms").map((name,i)=>{ const s = visitSyms[i]||{};
+    return `<div class="symrow ${s.on?"on":""}" data-i="${i}"><div><button type="button" class="chip ${s.on?"on":""}" data-k="on" style="width:100%;text-align:left;border-radius:10px">${name}</button>
+      <textarea rows="1" data-k="desc" placeholder="${t("symDesc")}">${esc(s.desc||"")}</textarea></div>
+      <div class="opts"><button type="button" class="chip ${s.status==="new"?"on":""}" data-k="new">${t("newS")}</button><button type="button" class="chip ${s.worse?"on":""}" data-k="worse">${t("worse")}</button></div></div>`; }).join("");
+  box.querySelectorAll(".symrow").forEach(row=>{
+    const i = +row.dataset.i;
+    row.querySelectorAll("button").forEach(b=> b.onclick=()=>{
+      const s = visitSyms[i] = visitSyms[i]||{};
+      if(b.dataset.k==="on"){ s.on=!s.on; if(!s.on){ s.status=undefined; s.worse=false; } }
+      else { s.on = true; if(b.dataset.k==="new") s.status = s.status==="new"?"old":"new"; else s.worse=!s.worse; }
+      renderSymList();
+    });
+    row.querySelector("textarea").oninput = e=>{ (visitSyms[i]=visitSyms[i]||{}).desc = e.target.value; };
+  });
+}
+document.getElementById("visitCancel").onclick = ()=> document.getElementById("visitSheet").classList.remove("open");
+document.getElementById("visitSave").onclick = ()=>{
+  const id = document.getElementById("visitId").value;
+  const rec = { id:id||uid(), date: document.getElementById("visitDate").value||nowIso(), syms: visitSyms,
+    top3: document.getElementById("visitTop3").value.trim(), q: document.getElementById("visitQ").value.trim() };
+  if(id) S.visits = S.visits.map(v=>v.id===id?rec:v); else S.visits.push(rec);
+  save(); document.getElementById("visitSheet").classList.remove("open"); renderVisits(); toast(t("saved"));
+};
+function delVisit(id){ if(!confirm(t("confirmDel"))) return; S.visits = S.visits.filter(v=>v.id!==id); save(); renderVisits(); toast(t("deleted")); }
+document.getElementById("visitAddBtn").onclick = ()=>openVisit(null);
+
+/* ---------- diary sheet ---------- */
+let diaryItems = {};
+function openDiary(id){
+  const d = id ? S.diary.find(x=>x.id===id) : S.diary.find(x=>x.date===nowIso());
+  document.getElementById("diarySheetTitle").textContent = d ? t("editDiary") : t("addDiary").replace("+ ","");
+  document.getElementById("diaryId").value = d ? d.id : "";
+  document.getElementById("diaryDate").value = d ? d.date : nowIso();
+  document.getElementById("diaryNote").value = d ? (d.note||"") : "";
+  diaryItems = d ? Object.assign({}, d.items||{}) : {};
+  renderDiarySyms();
+  document.getElementById("diarySheet").classList.add("open");
+}
+function renderDiarySyms(){
+  const box = document.getElementById("diarySyms");
+  box.innerHTML = t("diarySyms").map((name,i)=>{ const v = diaryItems[i]||0;
+    return `<div class="sevrow"><span>${name}</span><div class="seg" role="radiogroup" aria-label="${name}">${[0,1,2,3].map(n=>`<button type="button" class="${v===n?"on s"+n:""}" data-i="${i}" data-n="${n}" aria-pressed="${v===n}">${n}</button>`).join("")}</div></div>`; }).join("");
+  box.querySelectorAll("button").forEach(b=> b.onclick=()=>{ diaryItems[b.dataset.i]=+b.dataset.n; renderDiarySyms(); });
+}
+document.getElementById("diaryCancel").onclick = ()=> document.getElementById("diarySheet").classList.remove("open");
+document.getElementById("diarySave").onclick = ()=>{
+  const id = document.getElementById("diaryId").value;
+  const date = document.getElementById("diaryDate").value||nowIso();
+  const rec = { id:id||uid(), date, items:diaryItems, note: document.getElementById("diaryNote").value.trim() };
+  S.diary = S.diary.filter(d=> d.id!==rec.id && !(d.date===date && !id));
+  S.diary.push(rec);
+  save(); document.getElementById("diarySheet").classList.remove("open"); renderDiary(); toast(t("saved"));
+};
+function delDiary(id){ if(!confirm(t("confirmDel"))) return; S.diary = S.diary.filter(d=>d.id!==id); save(); renderDiary(); toast(t("deleted")); }
+document.getElementById("diaryAddBtn").onclick = ()=>openDiary(null);
+
+/* ---------- setup handlers ---------- */
+document.getElementById("setTime").onchange = e=>{ S.time=e.target.value||"20:00"; save(); renderToday(); };
+document.getElementById("setDose").onchange = e=>{ S.dose=e.target.value; save(); };
+document.getElementById("setDevice").onchange = e=>{ S.device=e.target.value; save(); };
+document.getElementById("setRest").onchange = e=>{ S.rest=+e.target.value; save(); renderAll(); };
+document.getElementById("setTheme").onchange = e=>{ S.theme=e.target.value; save(); applyTheme(); };
+document.getElementById("langBtn").onclick = ()=>{ S.lang = S.lang==="th"?"en":"th"; save(); renderAll(); setTitle(); };
+document.getElementById("exportBtn").onclick = async ()=>{
+  const txt = JSON.stringify(S);
+  try{ await navigator.clipboard.writeText(txt); toast(t("copied")); }
+  catch(e){ document.getElementById("importBox").value = txt; document.getElementById("importBox").select(); }
+};
+document.getElementById("importBtn").onclick = ()=>{
+  try{ const o = JSON.parse(document.getElementById("importBox").value); if(!Array.isArray(o.injections)) throw 0;
+    S = Object.assign(S,o); S.diary=S.diary||[]; save(); renderAll(); applyTheme(); toast(t("imported")); document.getElementById("importBox").value=""; }
+  catch(e){ toast(t("importFail")); }
+};
+document.getElementById("clearBtn").onclick = ()=>{ if(!confirm(t("confirmClear"))) return; try{ localStorage.removeItem(KEY);}catch(e){} location.reload(); };
+
+/* ---------- routing ---------- */
+const VIEWS = ["today","sites","log","doctor","setup","report"];
+function route(){
+  let v = location.hash.replace("#","");
+  if(!VIEWS.includes(v)) v = "today";
+  VIEWS.forEach(x=> document.getElementById("view-"+x).classList.toggle("active", x===v));
+  document.querySelectorAll("#tabs a").forEach(a=> a.classList.toggle("on", a.dataset.v===v));
+  setTitle(v);
+  if(v==="report") renderReport();
+  window.scrollTo(0,0);
+}
+function setTitle(v){ v = v || (location.hash.replace("#","")||"today"); if(!VIEWS.includes(v)) v="today";
+  document.getElementById("pageTitle").textContent = v==="today" ? t("appTitle") : v==="report" ? t("reportTitle") : v==="doctor" ? t("tabHealth") : t("tab"+v[0].toUpperCase()+v.slice(1));
+  document.getElementById("pageSub").textContent = v==="today" ? t("appSub") : ""; }
+window.addEventListener("hashchange", route);
+
+/* ---------- misc ---------- */
+let toastT; function toast(msg){ const el=document.getElementById("toast"); el.textContent=msg; el.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove("show"),1800); }
+document.querySelectorAll(".sheet").forEach(s=> s.addEventListener("click", e=>{ if(e.target===s) s.classList.remove("open"); }));
+
+load(); applyTheme(); renderAll(); route();
+if("serviceWorker" in navigator){ window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{})); }
+</script>
+</body>
+</html>
